@@ -1,10 +1,11 @@
 import { useState, useRef, useMemo } from "react";
-import { BookMarked, Github, Twitter } from "lucide-react";
 import { useAccount } from 'wagmi';
-import { WalletConnectButton } from "@/components/WalletConnectButton";
+import { Navigation } from "@/components/Navigation";
+import { Footer } from "@/components/Footer";
 import { GuestbookForm, TagType } from "@/components/GuestbookForm";
 import { EntryList } from "@/components/EntryList";
 import { SearchFilter } from "@/components/SearchFilter";
+import { toast } from "sonner";
 
 interface Reactions {
   heart: number;
@@ -27,8 +28,10 @@ interface Entry {
 // Mock data with tags and reactions
 const MOCK_ENTRIES: Entry[] = [];
 
-const Index = () => {
+export default function Guestbook() {
   const { address, isConnected } = useAccount();
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState('');
   const [entries, setEntries] = useState<Entry[]>(MOCK_ENTRIES);
   const [userReactions, setUserReactions] = useState<{ [entryId: string]: string[] }>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +39,19 @@ const Index = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [selectedTagFilter, setSelectedTagFilter] = useState<TagType | "all">("all");
   const entriesRef = useRef<HTMLDivElement>(null);
+
+  const handleConnect = () => {
+    const mockAddress = '0x' + Math.random().toString(16).slice(2, 42);
+    setWalletAddress(mockAddress);
+    setIsWalletConnected(true);
+    toast.success('Wallet connected!');
+  };
+
+  const handleDisconnect = () => {
+    setWalletAddress('');
+    setIsWalletConnected(false);
+    toast.info('Wallet disconnected');
+  };
 
   const handleSubmit = async (message: string, username: string, tag?: TagType) => {
     if (!address) return;
@@ -168,20 +184,16 @@ const Index = () => {
   }, [entries]);
 
   return (
-    <div className="min-h-screen w-full">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <BookMarked className="h-8 w-8 text-primary" />
-            <span className="text-xl font-serif font-bold">Base Forever Book</span>
-          </div>
-          <WalletConnectButton />
-        </div>
-      </header>
+    <div className="min-h-screen">
+      <Navigation
+        isWalletConnected={isWalletConnected || isConnected}
+        walletAddress={walletAddress || address}
+        onConnect={handleConnect}
+        onDisconnect={handleDisconnect}
+      />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pt-24 pb-12">
+      <main className="container mx-auto px-4 pt-32 pb-12">
         {/* Hero Section */}
         <section className="text-center mb-16 animate-slide-up">
           <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
@@ -252,48 +264,7 @@ const Index = () => {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border mt-20">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div className="px-4 py-2 glass rounded-full text-sm font-semibold">
-                ⚡ Powered by Base
-              </div>
-              <a
-                href="https://docs.base.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                Base Documentation
-              </a>
-            </div>
-            <div className="flex items-center gap-4">
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="GitHub"
-              >
-                <Github className="h-5 w-5" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-5 w-5" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
-};
-
-export default Index;
+}

@@ -7,7 +7,9 @@ import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { config } from './lib/wagmi-config';
 import '@rainbow-me/rainbowkit/styles.css';
-import Index from "./pages/Index";
+import Homepage from "./pages/Homepage";
+import Guestbook from "./pages/Guestbook";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,7 +23,9 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<Homepage />} />
+              <Route path="/guestbook" element={<Guestbook />} />
+              <Route path="/about" element={<About />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
