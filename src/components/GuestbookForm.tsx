@@ -5,14 +5,27 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
+export type TagType = "milestone" | "building" | "shipped" | "thanks" | "hello" | "announcement" | "idea";
+
+const TAGS: { value: TagType; label: string; color: string }[] = [
+  { value: "milestone", label: "#milestone", color: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
+  { value: "building", label: "#building", color: "bg-blue-500/20 text-blue-300 border-blue-500/30" },
+  { value: "shipped", label: "#shipped", color: "bg-green-500/20 text-green-300 border-green-500/30" },
+  { value: "thanks", label: "#thanks", color: "bg-pink-500/20 text-pink-300 border-pink-500/30" },
+  { value: "hello", label: "#hello", color: "bg-orange-500/20 text-orange-300 border-orange-500/30" },
+  { value: "announcement", label: "#announcement", color: "bg-red-500/20 text-red-300 border-red-500/30" },
+  { value: "idea", label: "#idea", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" },
+];
+
 interface GuestbookFormProps {
   isConnected: boolean;
-  onSubmit: (message: string, username: string) => Promise<void>;
+  onSubmit: (message: string, username: string, tag?: TagType) => Promise<void>;
 }
 
 export const GuestbookForm = ({ isConnected, onSubmit }: GuestbookFormProps) => {
   const [message, setMessage] = useState("");
   const [username, setUsername] = useState("");
+  const [selectedTag, setSelectedTag] = useState<TagType | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const maxMessageLength = 280;
@@ -34,9 +47,10 @@ export const GuestbookForm = ({ isConnected, onSubmit }: GuestbookFormProps) => 
 
     setIsSubmitting(true);
     try {
-      await onSubmit(message.trim(), username.trim());
+      await onSubmit(message.trim(), username.trim(), selectedTag);
       setMessage("");
       setUsername("");
+      setSelectedTag(undefined);
       toast.success("Your message has been added to the Forever Book!");
     } catch (error) {
       toast.error("Failed to add message. Please try again.");
@@ -89,6 +103,30 @@ export const GuestbookForm = ({ isConnected, onSubmit }: GuestbookFormProps) => 
             <span className={`font-medium ${remainingChars < 20 ? 'text-destructive' : 'text-muted-foreground'}`}>
               {remainingChars} characters remaining
             </span>
+          </div>
+        </div>
+
+        {/* Tag Selection */}
+        <div>
+          <label className="block text-sm font-medium mb-3 text-muted-foreground">
+            Add a tag (optional)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {TAGS.map((tag) => (
+              <button
+                key={tag.value}
+                type="button"
+                onClick={() => setSelectedTag(selectedTag === tag.value ? undefined : tag.value)}
+                disabled={!isConnected || isSubmitting}
+                className={`px-4 py-2 rounded-full text-sm font-medium border transition-all duration-300 ${
+                  selectedTag === tag.value
+                    ? `${tag.color} scale-105`
+                    : "bg-muted/20 text-muted-foreground border-border hover:scale-105"
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {tag.label}
+              </button>
+            ))}
           </div>
         </div>
 
