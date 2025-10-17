@@ -18,6 +18,26 @@ export const Navigation = ({ isWalletConnected, walletAddress, onConnect, onDisc
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  // Check if address has a BaseName
+  const getDisplayName = (address: string) => {
+    // If this is breybrooks's address, show BaseName
+    // This could be expanded to fetch BaseName from Base registry
+    const baseNameMap: { [key: string]: string } = {
+      // Add the actual wallet address here when known
+      'breybrooks': 'breybrooks.base.eth',
+    };
+    
+    // For now, show BaseName for demo purposes
+    const lowerAddress = address.toLowerCase();
+    for (const [key, baseName] of Object.entries(baseNameMap)) {
+      if (lowerAddress.includes(key)) {
+        return baseName;
+      }
+    }
+    
+    return shortenAddress(address);
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
       <div className="container mx-auto px-4">
@@ -64,7 +84,8 @@ export const Navigation = ({ isWalletConnected, walletAddress, onConnect, onDisc
               <div className="flex items-center gap-2">
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg glass">
                   <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                  <span className="text-sm font-medium">{shortenAddress(walletAddress!)}</span>
+                  <span className="text-sm font-medium">{getDisplayName(walletAddress!)}</span>
+                  <span className="text-xs text-muted-foreground">• Base</span>
                 </div>
                 <Button
                   variant="outline"

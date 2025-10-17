@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useAccount } from 'wagmi';
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
@@ -32,13 +32,39 @@ export default function Guestbook() {
   const { address, isConnected } = useAccount();
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
-  const [entries, setEntries] = useState<Entry[]>(MOCK_ENTRIES);
+  const [entries, setEntries] = useState<Entry[]>([]);
   const [userReactions, setUserReactions] = useState<{ [entryId: string]: string[] }>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [selectedTagFilter, setSelectedTagFilter] = useState<TagType | "all">("all");
   const entriesRef = useRef<HTMLDivElement>(null);
+
+  // Load entries from localStorage on mount
+  useEffect(() => {
+    const savedEntries = localStorage.getItem('base_guestbook_entries');
+    const savedReactions = localStorage.getItem('base_guestbook_reactions');
+    if (savedEntries) {
+      try {
+        const parsed = JSON.parse(savedEntries);
+        // Convert timestamp strings back to Date objects
+        const entriesWithDates = parsed.map((entry: any) => ({
+          ...entry,
+          timestamp: new Date(entry.timestamp)
+        }));
+        setEntries(entriesWithDates);
+      } catch (e) {
+        console.error('Failed to load entries from localStorage', e);
+      }
+    }
+    if (savedReactions) {
+      try {
+        setUserReactions(JSON.parse(savedReactions));
+      } catch (e) {
+        console.error('Failed to load reactions from localStorage', e);
+      }
+    }
+  }, []);
 
   const handleConnect = () => {
     const mockAddress = '0x' + Math.random().toString(16).slice(2, 42);
@@ -69,7 +95,12 @@ export default function Guestbook() {
       reactions: { heart: 0, thumbsUp: 0, fire: 0, hundred: 0 },
     };
 
-    setEntries([newEntry, ...entries]);
+    const updatedEntries = [newEntry, ...entries];
+    setEntries(updatedEntries);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('base_guestbook_entries', JSON.stringify(updatedEntries));
+    toast.success('Message saved permanently!');
 
     setTimeout(() => {
       entriesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -79,27 +110,28 @@ export default function Guestbook() {
   const handleReact = (entryId: string, reactionType: keyof Reactions) => {
     if (!address) return;
 
-    setEntries((prev) =>
-      prev.map((entry) =>
-        entry.id === entryId
-          ? {
-              ...entry,
-              reactions: {
-                ...entry.reactions,
-                [reactionType]: entry.reactions[reactionType] + 1,
-              },
-            }
-          : entry
-      )
+    const updatedEntries = entries.map((entry) =>
+      entry.id === entryId
+        ? {
+            ...entry,
+            reactions: {
+              ...entry.reactions,
+              [reactionType]: entry.reactions[reactionType] + 1,
+            },
+          }
+        : entry
     );
+    
+    setEntries(updatedEntries);
+    localStorage.setItem('base_guestbook_entries', JSON.stringify(updatedEntries));
 
-    setUserReactions((prev) => {
-      const entryReactions = prev[entryId] || [];
-      return {
-        ...prev,
-        [entryId]: [...entryReactions, reactionType],
-      };
-    });
+    const updatedReactions = {
+      ...userReactions,
+      [entryId]: [...(userReactions[entryId] || []), reactionType],
+    };
+    
+    setUserReactions(updatedReactions);
+    localStorage.setItem('base_guestbook_reactions', JSON.stringify(updatedReactions));
   };
 
   const filteredAndSortedEntries = useMemo(() => {
