@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Navigation } from '@/components/Navigation';
@@ -15,37 +14,15 @@ import {
   ArrowRight,
   Sparkles
 } from 'lucide-react';
-import { toast } from 'sonner';
 
 export default function Homepage() {
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState('');
-
-  const handleConnect = () => {
-    const mockAddress = '0x' + Math.random().toString(16).slice(2, 42);
-    setWalletAddress(mockAddress);
-    setIsWalletConnected(true);
-    toast.success('Wallet connected!');
-  };
-
-  const handleDisconnect = () => {
-    setWalletAddress('');
-    setIsWalletConnected(false);
-    toast.info('Wallet disconnected');
-  };
-
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen">
-      <Navigation
-        isWalletConnected={isWalletConnected}
-        walletAddress={walletAddress}
-        onConnect={handleConnect}
-        onDisconnect={handleDisconnect}
-      />
+      <Navigation />
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4">

@@ -1,42 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Book, Home, Info } from 'lucide-react';
+import { WalletConnectButton } from './WalletConnectButton';
 
-interface NavigationProps {
-  isWalletConnected: boolean;
-  walletAddress?: string;
-  onConnect: () => void;
-  onDisconnect: () => void;
-}
-
-export const Navigation = ({ isWalletConnected, walletAddress, onConnect, onDisconnect }: NavigationProps) => {
+export const Navigation = () => {
   const location = useLocation();
   
   const isActive = (path: string) => location.pathname === path;
-  
-  const shortenAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
-
-  // Check if address has a BaseName
-  const getDisplayName = (address: string) => {
-    // If this is breybrooks's address, show BaseName
-    // This could be expanded to fetch BaseName from Base registry
-    const baseNameMap: { [key: string]: string } = {
-      // Add the actual wallet address here when known
-      'breybrooks': 'breybrooks.base.eth',
-    };
-    
-    // For now, show BaseName for demo purposes
-    const lowerAddress = address.toLowerCase();
-    for (const [key, baseName] of Object.entries(baseNameMap)) {
-      if (lowerAddress.includes(key)) {
-        return baseName;
-      }
-    }
-    
-    return shortenAddress(address);
-  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
@@ -80,27 +49,7 @@ export const Navigation = ({ isWalletConnected, walletAddress, onConnect, onDisc
           </nav>
 
           <div className="flex items-center gap-3">
-            {isWalletConnected ? (
-              <div className="flex items-center gap-2">
-                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg glass">
-                  <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                  <span className="text-sm font-medium">{getDisplayName(walletAddress!)}</span>
-                  <span className="text-xs text-muted-foreground">• Base</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onDisconnect}
-                  className="text-xs"
-                >
-                  Disconnect
-                </Button>
-              </div>
-            ) : (
-              <Button onClick={onConnect} size="sm">
-                Connect Wallet
-              </Button>
-            )}
+            <WalletConnectButton />
           </div>
         </div>
 

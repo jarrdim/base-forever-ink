@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -17,22 +16,6 @@ import {
 import { toast } from 'sonner';
 
 export default function About() {
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState('');
-
-  const handleConnect = () => {
-    const mockAddress = '0x' + Math.random().toString(16).slice(2, 42);
-    setWalletAddress(mockAddress);
-    setIsWalletConnected(true);
-    toast.success('Wallet connected!');
-  };
-
-  const handleDisconnect = () => {
-    setWalletAddress('');
-    setIsWalletConnected(false);
-    toast.info('Wallet disconnected');
-  };
-
   const copyProjectId = () => {
     navigator.clipboard.writeText('9bf0183349252b3da5a51e76f76d6761');
     toast.success('Project ID copied!');
@@ -40,12 +23,7 @@ export default function About() {
 
   return (
     <div className="min-h-screen">
-      <Navigation
-        isWalletConnected={isWalletConnected}
-        walletAddress={walletAddress}
-        onConnect={handleConnect}
-        onDisconnect={handleDisconnect}
-      />
+      <Navigation />
 
       {/* Header */}
       <section className="pt-32 pb-12 px-4">

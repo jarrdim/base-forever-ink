@@ -30,8 +30,6 @@ const MOCK_ENTRIES: Entry[] = [];
 
 export default function Guestbook() {
   const { address, isConnected } = useAccount();
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
   const [userReactions, setUserReactions] = useState<{ [entryId: string]: string[] }>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,18 +64,6 @@ export default function Guestbook() {
     }
   }, []);
 
-  const handleConnect = () => {
-    const mockAddress = '0x' + Math.random().toString(16).slice(2, 42);
-    setWalletAddress(mockAddress);
-    setIsWalletConnected(true);
-    toast.success('Wallet connected!');
-  };
-
-  const handleDisconnect = () => {
-    setWalletAddress('');
-    setIsWalletConnected(false);
-    toast.info('Wallet disconnected');
-  };
 
   const handleSubmit = async (message: string, username: string, tag?: TagType) => {
     if (!address) return;
@@ -217,12 +203,7 @@ export default function Guestbook() {
 
   return (
     <div className="min-h-screen">
-      <Navigation
-        isWalletConnected={isWalletConnected || isConnected}
-        walletAddress={walletAddress || address}
-        onConnect={handleConnect}
-        onDisconnect={handleDisconnect}
-      />
+      <Navigation />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-32 pb-12">
