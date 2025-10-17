@@ -5,7 +5,10 @@ import { Footer } from "@/components/Footer";
 import { GuestbookForm, TagType } from "@/components/GuestbookForm";
 import { EntryList } from "@/components/EntryList";
 import { SearchFilter } from "@/components/SearchFilter";
+import { ContractStatus } from "@/components/ContractStatus";
 import { toast } from "sonner";
+import { useGuestbookContract } from "@/hooks/useGuestbookContract";
+import { Crown } from "lucide-react";
 
 interface Reactions {
   heart: number;
@@ -25,9 +28,6 @@ interface Entry {
   reactions: Reactions;
 }
 
-// Mock data with tags and reactions
-const MOCK_ENTRIES: Entry[] = [];
-
 export default function Guestbook() {
   const { address, isConnected } = useAccount();
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -38,23 +38,39 @@ export default function Guestbook() {
   const [selectedTagFilter, setSelectedTagFilter] = useState<TagType | "all">("all");
   const entriesRef = useRef<HTMLDivElement>(null);
 
-  // Load entries from localStorage on mount
+  // Blockchain integration
+  const {
+    messages,
+    isLoadingMessages,
+    signGuestbook,
+    isWritePending,
+    isConfirming,
+    isConfirmed,
+    transactionHash,
+    refetchMessages,
+    isContractDeployed,
+  } = useGuestbookContract();
+
+  // Load entries from blockchain when messages are fetched
   useEffect(() => {
-    const savedEntries = localStorage.getItem('base_guestbook_entries');
-    const savedReactions = localStorage.getItem('base_guestbook_reactions');
-    if (savedEntries) {
-      try {
-        const parsed = JSON.parse(savedEntries);
-        // Convert timestamp strings back to Date objects
-        const entriesWithDates = parsed.map((entry: any) => ({
-          ...entry,
-          timestamp: new Date(entry.timestamp)
-        }));
-        setEntries(entriesWithDates);
-      } catch (e) {
-        console.error('Failed to load entries from localStorage', e);
-      }
+    if (messages && messages.length > 0) {
+      const blockchainEntries: Entry[] = messages.map((msg, index) => ({
+        id: `${msg.sender}-${msg.timestamp.toString()}-${index}`,
+        username: msg.username || 'Anonymous',
+        walletAddress: msg.sender,
+        message: msg.content,
+        timestamp: new Date(Number(msg.timestamp) * 1000),
+        txHash: transactionHash?.toString() || '',
+        tag: msg.tag as TagType | undefined,
+        reactions: { heart: 0, thumbsUp: 0, fire: 0, hundred: 0 },
+      }));
+      setEntries(blockchainEntries.reverse()); // Show newest first
     }
+  }, [messages, transactionHash]);
+
+  // Load reactions from localStorage
+  useEffect(() => {
+    const savedReactions = localStorage.getItem('base_guestbook_reactions');
     if (savedReactions) {
       try {
         setUserReactions(JSON.parse(savedReactions));
@@ -64,33 +80,28 @@ export default function Guestbook() {
     }
   }, []);
 
+  // Refetch messages when transaction is confirmed
+  useEffect(() => {
+    if (isConfirmed) {
+      toast.success('Message saved permanently on the blockchain!');
+      refetchMessages();
+      setTimeout(() => {
+        entriesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 500);
+    }
+  }, [isConfirmed, refetchMessages]);
+
 
   const handleSubmit = async (message: string, username: string, tag?: TagType) => {
     if (!address) return;
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    const newEntry: Entry = {
-      id: Date.now().toString(),
-      username,
-      walletAddress: address,
-      message,
-      timestamp: new Date(),
-      txHash: "0x" + Math.random().toString(16).substring(2, 66),
-      tag,
-      reactions: { heart: 0, thumbsUp: 0, fire: 0, hundred: 0 },
-    };
-
-    const updatedEntries = [newEntry, ...entries];
-    setEntries(updatedEntries);
-    
-    // Save to localStorage for persistence
-    localStorage.setItem('base_guestbook_entries', JSON.stringify(updatedEntries));
-    toast.success('Message saved permanently!');
-
-    setTimeout(() => {
-      entriesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
+    try {
+      await signGuestbook(message, username, tag || '');
+      toast.info('Transaction submitted! Waiting for confirmation...');
+    } catch (error) {
+      console.error('Error submitting message:', error);
+      toast.error('Failed to submit message. Please try again.');
+    }
   };
 
   const handleReact = (entryId: string, reactionType: keyof Reactions) => {
@@ -209,6 +220,15 @@ export default function Guestbook() {
       <main className="container mx-auto px-4 pt-32 pb-12">
         {/* Hero Section */}
         <section className="text-center mb-16 animate-slide-up">
+          {/* Owner Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 glass rounded-full border border-primary/30">
+            <Crown className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-muted-foreground">
+              Guestbook by{' '}
+              <span className="text-primary font-semibold">breybrooks.base.eth</span>
+            </span>
+          </div>
+
           <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
             The Forever Guestbook
           </h1>
@@ -217,9 +237,12 @@ export default function Guestbook() {
           </p>
           <p className="text-foreground/80 max-w-3xl mx-auto leading-relaxed">
             Write your thoughts, share your story, and leave your mark. Every entry is permanently stored on Base,
-            creating a digital time capsule that will last forever.
+            creating a digital time capsule that will last forever. <span className="text-primary font-semibold">Completely gasless!</span>
           </p>
         </section>
+
+        {/* Contract Status */}
+        <ContractStatus />
 
         {/* Form Section */}
         <section className="mb-16">

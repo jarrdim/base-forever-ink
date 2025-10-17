@@ -1,4 +1,30 @@
-# Welcome to your Lovable project
+# Base Forever Book
+
+A blockchain-powered guestbook on Base network with gasless transactions and permanent message storage.
+
+## 🌟 Features
+
+- **Blockchain Storage**: All messages permanently stored on Base blockchain
+- **Gasless Transactions**: Zero gas fees thanks to Coinbase Paymaster integration
+- **BaseName Integration**: Owned by breybrooks.base.eth
+- **Wallet Connect**: Easy wallet connection with RainbowKit
+- **Permanent Records**: Messages cannot be deleted - truly forever
+- **Tag System**: Organize messages with categories
+- **Responsive Design**: Beautiful UI that works on all devices
+
+## 🚀 Smart Contract Deployment
+
+Before the guestbook can write to the blockchain, you need to deploy the smart contract:
+
+1. **Find the contract**: Check `contracts/Guestbook.sol`
+2. **Deploy it**: Use Remix, Hardhat, or Foundry (see `contracts/README.md` for detailed instructions)
+3. **Update the address**: Add your deployed contract address to `src/lib/contract.ts`
+
+The contract includes:
+- Message storage with sender, content, timestamp, username, and tags
+- Gasless transaction support via Base paymaster
+- Efficient message retrieval functions
+- Permanent on-chain storage (no deletion)
 
 ## Project info
 
@@ -49,6 +75,9 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- wagmi + viem (Web3)
+- RainbowKit (Wallet connection)
+- Base blockchain (Ethereum L2)
 
 
 
