@@ -16,7 +16,7 @@ contract Guestbook {
     }
     
     Message[] public messages;
-    address public owner;
+    address public immutable owner;
     
     event MessageSigned(
         address indexed sender,

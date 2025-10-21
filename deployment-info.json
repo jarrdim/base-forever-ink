@@ -1,0 +1,8 @@
+{
+  "contractAddress": "0x120B25828470d541e04426f0102FC3Ede6cb460C",
+  "network": "Base Sepolia",
+  "deploymentHash": "0x9ab7334538f8bbdd5dff240983500934cc868ee7b7422db3dccbe9d6adc3497b",
+  "gasUsed": "1051073",
+  "totalCost": "0.000001051159187986",
+  "timestamp": "2025-10-21T09:32:22.712Z"
+}

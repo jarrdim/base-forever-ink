@@ -1,6 +1,6 @@
-import { Copy, ExternalLink, Check, Heart, ThumbsUp, Flame, Star } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { Copy, Check, ExternalLink, Heart, ThumbsUp, Flame, Star, Twitter, Facebook, Linkedin, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { TagType } from "./GuestbookForm";
 
@@ -50,14 +50,7 @@ export const GuestbookEntry = ({
   onReact,
 }: GuestbookEntryProps) => {
   const [copied, setCopied] = useState(false);
-  const [animatingReaction, setAnimatingReaction] = useState<keyof Reactions | null>(null);
-
-  const reactionButtons: { type: keyof Reactions; icon: any; emoji: string }[] = [
-    { type: "heart", icon: Heart, emoji: "❤️" },
-    { type: "thumbsUp", icon: ThumbsUp, emoji: "👍" },
-    { type: "fire", icon: Flame, emoji: "🔥" },
-    { type: "hundred", icon: Star, emoji: "💯" },
-  ];
+  const [animatingReaction, setAnimatingReaction] = useState<string | null>(null);
 
   const shortenAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -67,50 +60,56 @@ export const GuestbookEntry = ({
     try {
       await navigator.clipboard.writeText(walletAddress);
       setCopied(true);
-      toast.success("Address copied!");
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      toast.error("Failed to copy address");
+    } catch (err) {
+      console.error('Failed to copy address:', err);
     }
   };
 
   const handleReaction = (reactionType: keyof Reactions) => {
-    if (!isConnected) {
-      toast.error("Connect your wallet to react");
-      return;
-    }
-    onReact(id, reactionType);
     setAnimatingReaction(reactionType);
-    setTimeout(() => setAnimatingReaction(null), 300);
+    onReact(id, reactionType);
+    setTimeout(() => setAnimatingReaction(null), 600);
   };
 
+  const reactionButtons = [
+    { type: 'heart' as keyof Reactions, emoji: '❤️' },
+    { type: 'thumbsUp' as keyof Reactions, emoji: '👍' },
+    { type: 'fire' as keyof Reactions, emoji: '🔥' },
+    { type: 'hundred' as keyof Reactions, emoji: '💯' },
+  ];
+
   return (
-    <div className="paper-texture rounded-xl p-6 hover-lift animate-fade-in transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-serif font-semibold text-xl text-gray-900">
-              {username || "Anonymous"}
-            </h3>
-            {tag && (
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border ${TAG_COLORS[tag]}`}>
-                #{tag}
-              </span>
-            )}
+    <div className="bg-card border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-hover rounded-full flex items-center justify-center text-white font-bold text-sm">
+            {username.charAt(0).toUpperCase()}
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="font-mono">{shortenAddress(walletAddress)}</span>
-            <button
-              onClick={copyAddress}
-              className="p-1 hover:bg-gray-200 rounded transition-colors"
-              aria-label="Copy address"
-            >
-              {copied ? (
-                <Check className="h-3 w-3 text-success" />
-              ) : (
-                <Copy className="h-3 w-3" />
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-foreground">{username}</h3>
+              {tag && (
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${TAG_COLORS[tag]}`}>
+                  #{tag}
+                </span>
               )}
-            </button>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="font-mono">{shortenAddress(walletAddress)}</span>
+              <button
+                onClick={copyAddress}
+                className="p-1 hover:bg-gray-200 rounded transition-colors"
+                aria-label="Copy address"
+              >
+                {copied ? (
+                  <Check className="h-3 w-3 text-success" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
         <span className="text-xs text-gray-500">
@@ -150,15 +149,84 @@ export const GuestbookEntry = ({
         })}
       </div>
 
-      <a
-        href={`https://basescan.org/tx/${txHash}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-hover transition-colors font-medium"
-      >
-        View on BaseScan
-        <ExternalLink className="h-3 w-3" />
-      </a>
+      {/* Social Sharing Buttons */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <span className="text-xs text-gray-500 mr-2">Share:</span>
+        
+        {/* Twitter Share */}
+        <button
+          onClick={() => {
+            const text = `"${message}" - ${username} on Base Forever Ink`;
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+            window.open(url, '_blank', 'width=550,height=420');
+          }}
+          className="flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200"
+          title="Share on Twitter"
+        >
+          <Twitter className="h-3 w-3" />
+          <span>Twitter</span>
+        </button>
+
+        {/* Facebook Share */}
+        <button
+          onClick={() => {
+            const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+            window.open(url, '_blank', 'width=550,height=420');
+          }}
+          className="flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-800 hover:bg-blue-100 transition-colors border border-blue-200"
+          title="Share on Facebook"
+        >
+          <Facebook className="h-3 w-3" />
+          <span>Facebook</span>
+        </button>
+
+        {/* LinkedIn Share */}
+        <button
+          onClick={() => {
+            const text = `"${message}" - ${username} on Base Forever Ink`;
+            const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(text)}`;
+            window.open(url, '_blank', 'width=550,height=420');
+          }}
+          className="flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors border border-blue-200"
+          title="Share on LinkedIn"
+        >
+          <Linkedin className="h-3 w-3" />
+          <span>LinkedIn</span>
+        </button>
+
+        {/* Copy Message */}
+        <button
+          onClick={() => {
+            const textToCopy = `"${message}" - ${username} on Base Forever Ink\n\nView on blockchain: https://basescan.org/tx/${txHash}`;
+            navigator.clipboard.writeText(textToCopy);
+            toast.success('Message copied to clipboard!');
+          }}
+          className="flex items-center gap-1 px-2 py-1 rounded-md text-xs bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors border border-gray-200"
+          title="Copy message"
+        >
+          <MessageSquare className="h-3 w-3" />
+          <span>Copy</span>
+        </button>
+      </div>
+
+      {/* Transaction Hash */}
+      <div className="flex items-center justify-between">
+        <a
+          href={`https://basescan.org/tx/${txHash}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-hover transition-colors font-medium"
+        >
+          View on BaseScan
+          <ExternalLink className="h-3 w-3" />
+        </a>
+        
+        {/* Transaction Hash Display */}
+        <div className="flex items-center gap-1 text-xs text-gray-500">
+          <span>TX:</span>
+          <span className="font-mono">{txHash ? `${txHash.slice(0, 6)}...${txHash.slice(-4)}` : 'N/A'}</span>
+        </div>
+      </div>
     </div>
   );
 };

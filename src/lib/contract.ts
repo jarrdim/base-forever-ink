@@ -1,7 +1,7 @@
 // Guestbook contract configuration and ABI
 
-// TODO: Replace with your deployed contract address after deployment
-export const GUESTBOOK_CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000" as const;
+// Deployed Guestbook contract address on Base Sepolia
+export const GUESTBOOK_CONTRACT_ADDRESS = "0x120B25828470d541e04426f0102FC3Ede6cb460C" as const;
 
 export const GUESTBOOK_ABI = [
   {

@@ -54,19 +54,43 @@ export default function Guestbook() {
   // Load entries from blockchain when messages are fetched
   useEffect(() => {
     if (messages && messages.length > 0) {
-      const blockchainEntries: Entry[] = messages.map((msg, index) => ({
-        id: `${msg.sender}-${msg.timestamp.toString()}-${index}`,
-        username: msg.username || 'Anonymous',
-        walletAddress: msg.sender,
-        message: msg.content,
-        timestamp: new Date(Number(msg.timestamp) * 1000),
-        txHash: transactionHash?.toString() || '',
-        tag: msg.tag as TagType | undefined,
-        reactions: { heart: 0, thumbsUp: 0, fire: 0, hundred: 0 },
-      }));
+      const blockchainEntries: Entry[] = messages.map((msg, index) => {
+        // Generate a unique transaction hash placeholder for each message
+        // In a real implementation, you'd get this from events or store it in the contract
+        const uniqueTxHash = `0x${msg.sender.slice(2, 10)}${msg.timestamp.toString(16)}${index.toString(16).padStart(4, '0')}`;
+        
+        return {
+          id: `${msg.sender}-${msg.timestamp.toString()}-${index}`,
+          username: msg.username || 'Anonymous',
+          walletAddress: msg.sender,
+          message: msg.content,
+          timestamp: new Date(Number(msg.timestamp) * 1000),
+          txHash: uniqueTxHash,
+          tag: msg.tag as TagType | undefined,
+          reactions: { heart: 0, thumbsUp: 0, fire: 0, hundred: 0 },
+        };
+      });
+      
+      // Load existing reactions from localStorage
+      const savedReactions = localStorage.getItem('base_guestbook_entries');
+      if (savedReactions) {
+        try {
+          const savedEntries = JSON.parse(savedReactions);
+          // Merge reactions from saved entries
+          blockchainEntries.forEach(entry => {
+            const savedEntry = savedEntries.find((saved: Entry) => saved.id === entry.id);
+            if (savedEntry) {
+              entry.reactions = savedEntry.reactions;
+            }
+          });
+        } catch (e) {
+          console.error('Failed to load saved reactions', e);
+        }
+      }
+      
       setEntries(blockchainEntries.reverse()); // Show newest first
     }
-  }, [messages, transactionHash]);
+  }, [messages]);
 
   // Load reactions from localStorage
   useEffect(() => {
