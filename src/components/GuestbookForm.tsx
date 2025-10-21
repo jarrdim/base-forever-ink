@@ -1,9 +1,12 @@
-import { useState } from "react";
-import { BookOpen, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { BookOpen, Loader2, DollarSign, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useAccount, useChainId } from "wagmi";
+import { useUSDCBalance, useUSDCAllowance, useUSDCApprove, formatUSDC, parseUSDC } from "@/lib/usdc";
+import { GUESTBOOK_CONTRACT_ADDRESS } from "@/lib/contract";
 
 export type TagType = "milestone" | "building" | "shipped" | "thanks" | "hello" | "announcement" | "idea";
 
@@ -27,10 +30,40 @@ export const GuestbookForm = ({ isConnected, onSubmit }: GuestbookFormProps) => 
   const [username, setUsername] = useState("");
   const [selectedTag, setSelectedTag] = useState<TagType | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  
+  const { address } = useAccount();
+  const chainId = useChainId();
+  const { data: usdcBalance, refetch: refetchBalance } = useUSDCBalance(address, chainId);
+  const { data: allowance, refetch: refetchAllowance } = useUSDCAllowance(address, GUESTBOOK_CONTRACT_ADDRESS, chainId);
+  const { approve: approveUSDC } = useUSDCApprove(chainId);
+  
+  const signingFee = parseUSDC("1"); // 1 USDC
+  const hasEnoughBalance = usdcBalance ? usdcBalance >= signingFee : false;
+  const hasEnoughAllowance = allowance ? allowance >= signingFee : false;
 
   const maxMessageLength = 280;
   const maxUsernameLength = 50;
   const remainingChars = maxMessageLength - message.length;
+
+  const handleApprove = async () => {
+    if (!approveUSDC) return;
+    
+    setIsApproving(true);
+    try {
+      approveUSDC(GUESTBOOK_CONTRACT_ADDRESS, signingFee);
+      toast.success("USDC approval successful!");
+      // Refetch allowance after approval
+      setTimeout(() => {
+        refetchAllowance();
+      }, 2000);
+    } catch (error) {
+      console.error("Approval failed:", error);
+      toast.error("Failed to approve USDC. Please try again.");
+    } finally {
+      setIsApproving(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +78,16 @@ export const GuestbookForm = ({ isConnected, onSubmit }: GuestbookFormProps) => 
       return;
     }
 
+    if (!hasEnoughBalance) {
+      toast.error("Insufficient USDC balance. You need 1 USDC to sign the guestbook.");
+      return;
+    }
+
+    if (!hasEnoughAllowance) {
+      toast.error("Please approve USDC spending first.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await onSubmit(message.trim(), username.trim(), selectedTag);
@@ -52,6 +95,11 @@ export const GuestbookForm = ({ isConnected, onSubmit }: GuestbookFormProps) => 
       setUsername("");
       setSelectedTag(undefined);
       toast.success("Your message has been added to the Forever Book!");
+      // Refetch balance after successful transaction
+      setTimeout(() => {
+        refetchBalance();
+        refetchAllowance();
+      }, 2000);
     } catch (error) {
       toast.error("Failed to add message. Please try again.");
     } finally {
@@ -130,20 +178,85 @@ export const GuestbookForm = ({ isConnected, onSubmit }: GuestbookFormProps) => 
           </div>
         </div>
 
+        {/* USDC Payment Section */}
+        {isConnected && (
+          <div className="space-y-4 p-4 rounded-xl bg-muted/20 border border-border">
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-medium">Payment Required</h3>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Signing Fee:</span>
+                <span className="font-medium">1 USDC</span>
+              </div>
+              
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Your USDC Balance:</span>
+                <span className={`font-medium ${hasEnoughBalance ? 'text-green-400' : 'text-destructive'}`}>
+                  {usdcBalance ? formatUSDC(usdcBalance) : '0'} USDC
+                </span>
+              </div>
+              
+              {hasEnoughBalance && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">USDC Approved:</span>
+                  <div className="flex items-center gap-2">
+                    <span className={`font-medium ${hasEnoughAllowance ? 'text-green-400' : 'text-yellow-400'}`}>
+                      {allowance ? formatUSDC(allowance) : '0'} USDC
+                    </span>
+                    {hasEnoughAllowance && <CheckCircle className="h-4 w-4 text-green-400" />}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {!hasEnoughBalance && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                <p className="text-sm text-destructive">
+                  You need at least 1 USDC to sign the guestbook. Please add USDC to your wallet.
+                </p>
+              </div>
+            )}
+            
+            {hasEnoughBalance && !hasEnoughAllowance && (
+              <Button
+                type="button"
+                onClick={handleApprove}
+                disabled={isApproving}
+                className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 rounded-lg transition-all duration-300"
+              >
+                {isApproving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Approving USDC...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Approve 1 USDC
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+
         <Button
           type="submit"
-          disabled={!isConnected || isSubmitting || !message.trim()}
+          disabled={!isConnected || isSubmitting || !message.trim() || !hasEnoughBalance || !hasEnoughAllowance}
           className="w-full bg-primary hover:bg-primary-hover text-primary-foreground font-semibold py-6 rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Signing...
+              Signing & Paying...
             </>
           ) : (
             <>
               <BookOpen className="mr-2 h-5 w-5" />
-              Sign the Forever Book
+              Sign for 1 USDC
             </>
           )}
         </Button>

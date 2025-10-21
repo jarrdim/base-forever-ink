@@ -8,6 +8,8 @@ import { SearchFilter } from "@/components/SearchFilter";
 import { ContractStatus } from "@/components/ContractStatus";
 import { toast } from "sonner";
 import { useGuestbookContract } from "@/hooks/useGuestbookContract";
+import { useUserAuth } from "@/hooks/useUserAuth";
+import { guestbookApi, activityApi } from "@/lib/api";
 import { Crown } from "lucide-react";
 
 interface Reactions {
@@ -30,6 +32,7 @@ interface Entry {
 
 export default function Guestbook() {
   const { address, isConnected } = useAccount();
+  const { user, isAuthenticated, logActivity, updateUserStats } = useUserAuth();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [userReactions, setUserReactions] = useState<{ [entryId: string]: string[] }>({});
   const [searchQuery, setSearchQuery] = useState("");
@@ -104,20 +107,65 @@ export default function Guestbook() {
     }
   }, []);
 
-  // Refetch messages when transaction is confirmed
+  // Save to database and refetch messages when transaction is confirmed
   useEffect(() => {
-    if (isConfirmed) {
-      toast.success('Message saved permanently on the blockchain!');
-      refetchMessages();
+    if (isConfirmed && transactionHash && user) {
+      const saveToDatabase = async () => {
+        try {
+          // Get the latest message from blockchain to save to database
+          const refetchResult = await refetchMessages();
+          const latestMessages = refetchResult.data;
+          if (latestMessages && latestMessages.length > 0) {
+            const latestMessage = latestMessages[0]; // Most recent message
+            
+            // Save to database
+            const response = await guestbookApi.saveMessage(
+              user.userId,
+              user.walletAddress,
+              latestMessage.username || user.username || 'Anonymous',
+              latestMessage.content,
+              transactionHash,
+              latestMessage.tag as TagType | undefined
+            );
+
+            if (response.data) {
+              // Log activity
+              await logActivity('message_posted', {
+                messageId: response.data.message.messageId,
+                message: latestMessage.content,
+                tag: latestMessage.tag,
+                txHash: transactionHash
+              });
+
+              // Update user stats
+              updateUserStats(1, 0);
+              
+              toast.success('Message saved permanently on the blockchain and database!');
+            } else {
+              console.error('Failed to save to database:', response.error);
+              toast.success('Message saved on blockchain! (Database sync pending)');
+            }
+          }
+        } catch (error) {
+          console.error('Error saving to database:', error);
+          toast.success('Message saved on blockchain! (Database sync pending)');
+        }
+      };
+
+      saveToDatabase();
+      
       setTimeout(() => {
         entriesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 500);
     }
-  }, [isConfirmed, refetchMessages]);
+  }, [isConfirmed, transactionHash, user, refetchMessages, logActivity, updateUserStats]);
 
 
   const handleSubmit = async (message: string, username: string, tag?: TagType) => {
-    if (!address) return;
+    if (!address || !user) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
 
     try {
       await signGuestbook(message, username, tag || '');
@@ -128,8 +176,17 @@ export default function Guestbook() {
     }
   };
 
-  const handleReact = (entryId: string, reactionType: keyof Reactions) => {
-    if (!address) return;
+  const handleReact = async (entryId: string, reactionType: keyof Reactions) => {
+    if (!address || !user) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
+    // Check if user already reacted with this type
+    if (userReactions[entryId]?.includes(reactionType)) {
+      toast.info('You already reacted with this emoji');
+      return;
+    }
 
     const updatedEntries = entries.map((entry) =>
       entry.id === entryId
@@ -153,6 +210,27 @@ export default function Guestbook() {
     
     setUserReactions(updatedReactions);
     localStorage.setItem('base_guestbook_reactions', JSON.stringify(updatedReactions));
+
+    // Save reaction to database
+    try {
+      const response = await guestbookApi.addReaction(entryId, user.userId, reactionType);
+      
+      if (response.data) {
+        // Log activity
+        await logActivity('reaction_added', {
+          entryId,
+          reactionType,
+          targetUser: entries.find(e => e.id === entryId)?.walletAddress
+        });
+
+        // Update user stats
+        updateUserStats(0, 1);
+      } else {
+        console.error('Failed to save reaction to database:', response.error);
+      }
+    } catch (error) {
+      console.error('Error saving reaction to database:', error);
+    }
   };
 
   const filteredAndSortedEntries = useMemo(() => {
