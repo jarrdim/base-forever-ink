@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { config } from './lib/wagmi-config';
+import { AnimatedBackground } from './components/AnimatedBackground';
 import '@rainbow-me/rainbowkit/styles.css';
 import Homepage from "./pages/Homepage";
 import Guestbook from "./pages/Guestbook";
@@ -19,6 +20,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <RainbowKitProvider>
         <TooltipProvider>
+          <AnimatedBackground />
           <Toaster />
           <Sonner />
           <BrowserRouter>

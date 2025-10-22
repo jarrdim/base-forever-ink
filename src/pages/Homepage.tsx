@@ -21,31 +21,31 @@ export default function Homepage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative z-10">
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
+      <section className="pt-24 pb-12 px-4">
         <div className="container mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass mb-4 animate-fade-in">
             <Sparkles className="w-4 h-4 text-primary" />
             <span className="text-sm">Built on Base Layer 2</span>
           </div>
           
-          <h1 className="font-serif text-5xl md:text-7xl font-bold mb-6 animate-fade-in bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+          <h1 className="font-serif text-4xl md:text-6xl font-bold mb-4 animate-fade-in bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
             Base Forever Book
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground mb-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <p className="text-lg md:text-xl text-muted-foreground mb-3 animate-fade-in" style={{ animationDelay: '100ms' }}>
             Leave Your Mark on the Blockchain Forever
           </p>
           
-          <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto mb-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
             The eternal guestbook for the Base ecosystem. Write your message, share your story, 
             and create a permanent record that will last as long as blockchain exists.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '300ms' }}>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center animate-fade-in" style={{ animationDelay: '300ms' }}>
             <Link to="/guestbook">
               <Button size="lg" className="text-base px-8">
                 Open Guestbook
@@ -58,31 +58,31 @@ export default function Homepage() {
           </div>
 
           {/* Floating Book Icon */}
-          <div className="mt-16 animate-slide-up">
-            <div className="inline-block p-8 rounded-3xl glass hover-lift">
-              <Book className="w-24 h-24 text-primary animate-pulse" />
+          <div className="mt-10 animate-slide-up">
+            <div className="inline-block p-6 rounded-3xl glass hover-lift">
+              <Book className="w-20 h-20 text-primary animate-pulse" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4">
+      <section id="features" className="py-12 px-4">
         <div className="container mx-auto">
-          <h2 className="font-serif text-4xl font-bold text-center mb-4">
+          <h2 className="font-serif text-3xl font-bold text-center mb-3">
             Why Base Forever Book?
           </h2>
-          <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
             A decentralized, permanent, and community-driven guestbook for the Base ecosystem
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
             {/* Feature 1 */}
-            <div className="glass p-8 rounded-2xl hover-lift group">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Shield className="w-6 h-6 text-primary" />
+            <div className="glass p-6 rounded-2xl hover-lift group">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Shield className="w-5 h-5 text-primary" />
               </div>
-              <h3 className="font-serif text-2xl font-semibold mb-3">Permanent & Immutable</h3>
+              <h3 className="font-serif text-xl font-semibold mb-2">Permanent & Immutable</h3>
               <p className="text-muted-foreground">
                 Your messages are stored on the Base blockchain forever. They can never be deleted, 
                 censored, or lost.
@@ -90,38 +90,38 @@ export default function Homepage() {
             </div>
 
             {/* Feature 2 */}
-            <div className="glass p-8 rounded-2xl hover-lift group">
-              <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <CheckCircle2 className="w-6 h-6 text-success" />
+            <div className="glass p-6 rounded-2xl hover-lift group">
+              <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <CheckCircle2 className="w-5 h-5 text-success" />
               </div>
-              <h3 className="font-serif text-2xl font-semibold mb-3">Verified & Authentic</h3>
+              <h3 className="font-serif text-xl font-semibold mb-2">Verified & Authentic</h3>
               <p className="text-muted-foreground">
                 Every entry is cryptographically signed by your wallet, providing undeniable proof of authenticity.
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="glass p-8 rounded-2xl hover-lift group border-2 border-primary/50">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Zap className="w-6 h-6 text-accent" />
+            <div className="glass p-6 rounded-2xl hover-lift group border-2 border-primary/50">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Zap className="w-5 h-5 text-accent" />
                 </div>
                 <span className="px-2 py-1 rounded-full bg-primary/20 text-primary text-xs font-semibold">
                   ⛽ GASLESS
                 </span>
               </div>
-              <h3 className="font-serif text-2xl font-semibold mb-3">Zero Gas Fees</h3>
+              <h3 className="font-serif text-xl font-semibold mb-2">Zero Gas Fees</h3>
               <p className="text-muted-foreground">
                 Sign the guestbook completely FREE. We sponsor all transaction costs via Coinbase Paymaster - no ETH needed!
               </p>
             </div>
 
             {/* Feature 4 */}
-            <div className="glass p-8 rounded-2xl hover-lift group">
-              <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Users className="w-6 h-6 text-secondary" />
+            <div className="glass p-6 rounded-2xl hover-lift group">
+              <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                <Users className="w-5 h-5 text-secondary" />
               </div>
-              <h3 className="font-serif text-2xl font-semibold mb-3">Community Driven</h3>
+              <h3 className="font-serif text-xl font-semibold mb-2">Community Driven</h3>
               <p className="text-muted-foreground">
                 React to messages, engage with other signers, and be part of the growing Base community.
               </p>
@@ -131,53 +131,53 @@ export default function Homepage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 px-4 bg-gradient-to-b from-transparent to-card/30">
+      <section className="py-12 px-4 bg-gradient-to-b from-transparent to-card/30">
         <div className="container mx-auto">
-          <h2 className="font-serif text-4xl font-bold text-center mb-4">
+          <h2 className="font-serif text-3xl font-bold text-center mb-3">
             How It Works
           </h2>
-          <p className="text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-center mb-10 max-w-2xl mx-auto">
             Three simple steps to leave your permanent mark on the blockchain
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Step 1 */}
-            <div className="text-center space-y-4 animate-fade-in">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto border-2 border-primary">
-                <Wallet className="w-8 h-8 text-primary" />
+            <div className="text-center space-y-3 animate-fade-in">
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto border-2 border-primary">
+                <Wallet className="w-7 h-7 text-primary" />
               </div>
-              <div className="w-12 h-12 rounded-full bg-primary mx-auto flex items-center justify-center font-bold text-2xl">
+              <div className="w-10 h-10 rounded-full bg-primary mx-auto flex items-center justify-center font-bold text-xl">
                 1
               </div>
-              <h3 className="font-serif text-xl font-semibold">Connect Your Wallet</h3>
+              <h3 className="font-serif text-lg font-semibold">Connect Your Wallet</h3>
               <p className="text-muted-foreground text-sm">
                 Connect your Base-compatible wallet (Coinbase Wallet, MetaMask, or any Web3 wallet)
               </p>
             </div>
 
             {/* Step 2 */}
-            <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto border-2 border-accent">
-                <Edit3 className="w-8 h-8 text-accent" />
+            <div className="text-center space-y-3 animate-fade-in" style={{ animationDelay: '100ms' }}>
+              <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mx-auto border-2 border-accent">
+                <Edit3 className="w-7 h-7 text-accent" />
               </div>
-              <div className="w-12 h-12 rounded-full bg-accent mx-auto flex items-center justify-center font-bold text-2xl">
+              <div className="w-10 h-10 rounded-full bg-accent mx-auto flex items-center justify-center font-bold text-xl">
                 2
               </div>
-              <h3 className="font-serif text-xl font-semibold">Write Your Message</h3>
+              <h3 className="font-serif text-lg font-semibold">Write Your Message</h3>
               <p className="text-muted-foreground text-sm">
                 Craft your message (up to 280 characters), add your name, and choose a category tag
               </p>
             </div>
 
             {/* Step 3 */}
-            <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
-              <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto border-2 border-secondary">
-                <Infinity className="w-8 h-8 text-secondary" />
+            <div className="text-center space-y-3 animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center mx-auto border-2 border-secondary">
+                <Infinity className="w-7 h-7 text-secondary" />
               </div>
-              <div className="w-12 h-12 rounded-full bg-secondary mx-auto flex items-center justify-center font-bold text-2xl">
+              <div className="w-10 h-10 rounded-full bg-secondary mx-auto flex items-center justify-center font-bold text-xl">
                 3
               </div>
-              <h3 className="font-serif text-xl font-semibold">Sign Forever</h3>
+              <h3 className="font-serif text-lg font-semibold">Sign Forever</h3>
               <p className="text-muted-foreground text-sm">
                 Sign the transaction (for FREE!) and your message lives on the blockchain eternally
               </p>
@@ -187,14 +187,14 @@ export default function Homepage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 px-4">
+      <section className="py-12 px-4">
         <div className="container mx-auto">
-          <h2 className="font-serif text-4xl font-bold text-center mb-12">
+          <h2 className="font-serif text-3xl font-bold text-center mb-8">
             Join the Community
           </h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            <div className="glass p-6 rounded-2xl text-center hover-lift">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+            <div className="glass p-5 rounded-2xl text-center hover-lift">
               <div className="text-4xl mb-2">📝</div>
               <div className="text-3xl font-bold text-primary mb-1">1,234+</div>
               <div className="text-sm text-muted-foreground">Total Messages</div>
@@ -222,13 +222,13 @@ export default function Homepage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4">
+      <section className="py-12 px-4">
         <div className="container mx-auto">
-          <div className="glass p-12 rounded-3xl text-center max-w-4xl mx-auto border-2 border-primary/30">
-            <h2 className="font-serif text-4xl md:text-5xl font-bold mb-4">
+          <div className="glass p-8 rounded-3xl text-center max-w-4xl mx-auto border-2 border-primary/30">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-3">
               Ready to Leave Your Mark?
             </h2>
-            <p className="text-xl text-muted-foreground mb-8">
+            <p className="text-lg text-muted-foreground mb-6">
               Join thousands of builders, creators, and enthusiasts on Base
             </p>
             <Link to="/guestbook">
@@ -237,7 +237,7 @@ export default function Homepage() {
                 <ArrowRight className="ml-2 w-6 h-6" />
               </Button>
             </Link>
-            <p className="text-sm text-muted-foreground mt-6">
+            <p className="text-sm text-muted-foreground mt-4">
               Free to use • Forever on-chain • No registration required
             </p>
           </div>

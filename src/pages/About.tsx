@@ -22,30 +22,30 @@ export default function About() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative z-10">
       <Navigation />
 
       {/* Header */}
-      <section className="pt-32 pb-12 px-4">
+      <section className="pt-24 pb-8 px-4">
         <div className="container mx-auto text-center max-w-4xl">
-          <h1 className="font-serif text-5xl md:text-6xl font-bold mb-4">
+          <h1 className="font-serif text-4xl md:text-5xl font-bold mb-3">
             About Base Forever Book
           </h1>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-lg text-muted-foreground">
             Building the eternal record of the Base ecosystem
           </p>
         </div>
       </section>
 
       {/* Mission Section */}
-      <section className="py-12 px-4">
+      <section className="py-8 px-4">
         <div className="container mx-auto max-w-4xl">
-          <div className="glass p-8 md:p-12 rounded-2xl">
-            <h2 className="font-serif text-3xl font-bold mb-6 flex items-center gap-3">
-              <Book className="w-8 h-8 text-primary" />
+          <div className="glass p-6 md:p-8 rounded-2xl">
+            <h2 className="font-serif text-2xl font-bold mb-4 flex items-center gap-3">
+              <Book className="w-7 h-7 text-primary" />
               Our Mission
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-4">
+            <p className="text-base text-muted-foreground leading-relaxed mb-3">
               Base Forever Book exists to create a permanent, decentralized space where the Base 
               community can share their stories, celebrate milestones, and leave their mark on 
               blockchain history.
@@ -60,9 +60,9 @@ export default function About() {
       </section>
 
       {/* Gasless Transactions Section - PROMINENT */}
-      <section className="py-12 px-4">
+      <section className="py-8 px-4">
         <div className="container mx-auto max-w-4xl">
-          <div className="glass p-8 md:p-12 rounded-2xl border-2 border-primary/50 relative overflow-hidden">
+          <div className="glass p-6 md:p-8 rounded-2xl border-2 border-primary/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
             
             <div className="relative">
@@ -160,9 +160,9 @@ export default function About() {
       </section>
 
       {/* Technology Section */}
-      <section className="py-12 px-4">
+      <section className="py-8 px-4">
         <div className="container mx-auto max-w-4xl">
-          <div className="glass p-8 md:p-12 rounded-2xl">
+          <div className="glass p-6 md:p-8 rounded-2xl">
             <h2 className="font-serif text-3xl font-bold mb-6 flex items-center gap-3">
               <Zap className="w-8 h-8 text-accent" />
               Built on Base
@@ -202,12 +202,12 @@ export default function About() {
       </section>
 
       {/* Features Overview */}
-      <section className="py-12 px-4">
+      <section className="py-8 px-4">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="font-serif text-3xl font-bold mb-6 text-center">
+          <h2 className="font-serif text-2xl font-bold mb-5 text-center">
             Platform Features
           </h2>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-3">
             {[
               'Wallet Integration (RainbowKit)',
               'On-chain Message Storage',
@@ -230,12 +230,12 @@ export default function About() {
       </section>
 
       {/* Roadmap Section */}
-      <section className="py-12 px-4">
+      <section className="py-8 px-4">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="font-serif text-3xl font-bold mb-8 text-center">
+          <h2 className="font-serif text-2xl font-bold mb-6 text-center">
             What's Next?
           </h2>
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="glass p-6 rounded-xl">
               <div className="flex items-start gap-4">
                 <CheckCircle2 className="w-6 h-6 text-success flex-shrink-0 mt-1" />
@@ -280,9 +280,9 @@ export default function About() {
       </section>
 
       {/* Team Section */}
-      <section className="py-12 px-4">
+      <section className="py-8 px-4">
         <div className="container mx-auto max-w-4xl">
-          <div className="glass p-8 md:p-12 rounded-2xl text-center">
+          <div className="glass p-6 md:p-8 rounded-2xl text-center">
             <h2 className="font-serif text-3xl font-bold mb-4">
               Built for Base Buildathon
             </h2>
@@ -322,9 +322,9 @@ export default function About() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-12 px-4 mb-12">
+      <section className="py-8 px-4 mb-8">
         <div className="container mx-auto max-w-4xl">
-          <div className="glass p-8 rounded-2xl">
+          <div className="glass p-6 rounded-2xl">
             <h2 className="font-serif text-2xl font-bold mb-4 text-center">
               Get Involved
             </h2>

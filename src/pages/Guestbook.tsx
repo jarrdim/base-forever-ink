@@ -316,15 +316,15 @@ export default function Guestbook() {
   }, [entries]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative z-10">
       <Navigation />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pt-32 pb-12">
+      <main className="container mx-auto px-4 pt-24 pb-8">
         {/* Hero Section */}
-        <section className="text-center mb-16 animate-slide-up">
+        <section className="text-center mb-10 animate-slide-up">
           {/* Owner Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 glass rounded-full border border-primary/30">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-4 glass rounded-full border border-primary/30">
             <Crown className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-muted-foreground">
               Guestbook by{' '}
@@ -332,13 +332,13 @@ export default function Guestbook() {
             </span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-serif font-bold mb-6 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-6xl font-serif font-bold mb-4 bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
             The Forever Guestbook
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-4 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground mb-3 max-w-2xl mx-auto">
             Your message, immortalized on the blockchain
           </p>
-          <p className="text-foreground/80 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm text-foreground/80 max-w-3xl mx-auto leading-relaxed">
             Write your thoughts, share your story, and leave your mark. Every entry is permanently stored on Base,
             creating a digital time capsule that will last forever. <span className="text-primary font-semibold">Completely gasless!</span>
           </p>
@@ -348,19 +348,19 @@ export default function Guestbook() {
         <ContractStatus />
 
         {/* Form Section */}
-        <section className="mb-16">
+        <section className="mb-10">
           <PaidGuestbookForm isConnected={isConnected} onSubmit={handleSubmit} />
         </section>
 
         {/* Recent Signatures Section */}
-        <section className="mb-16">
+        <section className="mb-10">
           <RecentSignatures />
         </section>
 
         {/* Entries Section */}
         <section ref={entriesRef}>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-serif font-bold">Recent Signatures</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-serif font-bold">Recent Signatures</h2>
             <span className="text-sm text-muted-foreground">
               {filteredAndSortedEntries.length} {filteredAndSortedEntries.length === 1 ? "entry" : "entries"}
             </span>
