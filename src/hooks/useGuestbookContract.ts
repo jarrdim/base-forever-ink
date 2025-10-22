@@ -1,5 +1,5 @@
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { GUESTBOOK_CONTRACT_ADDRESS, GUESTBOOK_ABI } from '@/lib/contract';
+import { SIMPLE_GUESTBOOK_CONTRACT_ADDRESS, SIMPLE_GUESTBOOK_ABI } from '@/lib/simple-contract';
 import { toast } from 'sonner';
 
 export interface BlockchainMessage {
@@ -10,28 +10,24 @@ export interface BlockchainMessage {
   tag: string;
 }
 
-const isContractDeployed = GUESTBOOK_CONTRACT_ADDRESS !== "0x0000000000000000000000000000000000000000";
+const isContractDeployed = SIMPLE_GUESTBOOK_CONTRACT_ADDRESS !== "0x0000000000000000000000000000000000000000";
 
 export function useGuestbookContract() {
-  // Read all messages from the contract (only if deployed)
-  const { data: messages, isLoading: isLoadingMessages, refetch: refetchMessages } = useReadContract({
-    address: GUESTBOOK_CONTRACT_ADDRESS,
-    abi: GUESTBOOK_ABI,
-    functionName: 'getAllMessages',
-    query: {
-      enabled: isContractDeployed,
-    },
-  });
-
   // Read message count (only if deployed)
-  const { data: messageCount } = useReadContract({
-    address: GUESTBOOK_CONTRACT_ADDRESS,
-    abi: GUESTBOOK_ABI,
+  const { data: messageCount, refetch: refetchMessageCount } = useReadContract({
+    address: SIMPLE_GUESTBOOK_CONTRACT_ADDRESS,
+    abi: SIMPLE_GUESTBOOK_ABI,
     functionName: 'getMessageCount',
     query: {
       enabled: isContractDeployed,
     },
   });
+
+  // For now, we'll use a simplified approach - just return empty messages array
+  // In a full implementation, you'd fetch individual messages using getMessage(index)
+  const messages: BlockchainMessage[] = [];
+  const isLoadingMessages = false;
+  const refetchMessages = refetchMessageCount;
 
   // Write contract hook
   const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
@@ -50,8 +46,8 @@ export function useGuestbookContract() {
 
     try {
       return writeContract({
-        address: GUESTBOOK_CONTRACT_ADDRESS,
-        abi: GUESTBOOK_ABI,
+        address: SIMPLE_GUESTBOOK_CONTRACT_ADDRESS,
+        abi: SIMPLE_GUESTBOOK_ABI,
         functionName: 'signGuestbook',
         args: [content, username, tag || ''],
       } as any);
@@ -63,7 +59,7 @@ export function useGuestbookContract() {
   };
 
   return {
-    messages: messages as BlockchainMessage[] | undefined,
+    messages: messages,
     messageCount: messageCount as bigint | undefined,
     isLoadingMessages,
     signGuestbook,

@@ -1,0 +1,146 @@
+import { useState, useEffect, useCallback } from 'react';
+import { useAccount, useWalletClient } from 'wagmi';
+import { createSmartAccountWithPaymaster, executeGaslessTransaction, checkPaymasterStatus } from '@/lib/paymaster';
+import { Address } from 'viem';
+import { toast } from 'sonner';
+
+export interface SmartAccountState {
+  smartAccountClient: any;
+  smartAccount: any;
+  publicClient: any;
+  isLoading: boolean;
+  isReady: boolean;
+  error: string | null;
+}
+
+export interface UseSmartAccountReturn extends SmartAccountState {
+  initializeSmartAccount: () => Promise<void>;
+  executeTransaction: (to: Address, data: `0x${string}`, value?: bigint) => Promise<string>;
+  checkPaymaster: () => Promise<boolean>;
+  reset: () => void;
+}
+
+export function useSmartAccount(): UseSmartAccountReturn {
+  const { address, isConnected } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  
+  const [state, setState] = useState<SmartAccountState>({
+    smartAccountClient: null,
+    smartAccount: null,
+    publicClient: null,
+    isLoading: false,
+    isReady: false,
+    error: null,
+  });
+
+  const reset = useCallback(() => {
+    setState({
+      smartAccountClient: null,
+      smartAccount: null,
+      publicClient: null,
+      isLoading: false,
+      isReady: false,
+      error: null,
+    });
+  }, []);
+
+  const initializeSmartAccount = useCallback(async () => {
+    if (!walletClient || !isConnected || !address) {
+      setState(prev => ({ ...prev, error: 'Wallet not connected' }));
+      return;
+    }
+
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+
+    try {
+      console.log('Initializing smart account with paymaster...');
+      
+      // Check if paymaster is available
+      const paymasterAvailable = await checkPaymasterStatus();
+      if (!paymasterAvailable) {
+        throw new Error('Paymaster service is not available');
+      }
+
+      // Create smart account with paymaster
+      const { smartAccountClient, smartAccount, publicClient } = await createSmartAccountWithPaymaster(walletClient);
+
+      setState({
+        smartAccountClient,
+        smartAccount,
+        publicClient,
+        isLoading: false,
+        isReady: true,
+        error: null,
+      });
+
+      console.log('Smart account initialized successfully');
+      toast.success('Gas-free transactions enabled!');
+    } catch (error) {
+      console.error('Failed to initialize smart account:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize smart account';
+      
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        isReady: false,
+        error: errorMessage,
+      }));
+
+      toast.error(`Failed to enable gas-free transactions: ${errorMessage}`);
+    }
+  }, [walletClient, isConnected, address]);
+
+  const executeTransaction = useCallback(async (
+    to: Address,
+    data: `0x${string}`,
+    value: bigint = 0n
+  ): Promise<string> => {
+    if (!state.smartAccountClient || !state.isReady) {
+      throw new Error('Smart account not initialized');
+    }
+
+    try {
+      console.log('Executing gas-free transaction...');
+      const txHash = await executeGaslessTransaction(state.smartAccountClient, to, data, value);
+      
+      toast.success('Transaction sent without gas fees!');
+      return txHash;
+    } catch (error) {
+      console.error('Failed to execute gas-free transaction:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Transaction failed';
+      toast.error(`Gas-free transaction failed: ${errorMessage}`);
+      throw error;
+    }
+  }, [state.smartAccountClient, state.isReady]);
+
+  const checkPaymaster = useCallback(async (): Promise<boolean> => {
+    try {
+      return await checkPaymasterStatus();
+    } catch (error) {
+      console.error('Error checking paymaster status:', error);
+      return false;
+    }
+  }, []);
+
+  // Auto-initialize when wallet is connected
+  useEffect(() => {
+    if (isConnected && walletClient && !state.isReady && !state.isLoading) {
+      initializeSmartAccount();
+    }
+  }, [isConnected, walletClient, state.isReady, state.isLoading, initializeSmartAccount]);
+
+  // Reset when wallet disconnects
+  useEffect(() => {
+    if (!isConnected) {
+      reset();
+    }
+  }, [isConnected, reset]);
+
+  return {
+    ...state,
+    initializeSmartAccount,
+    executeTransaction,
+    checkPaymaster,
+    reset,
+  };
+}

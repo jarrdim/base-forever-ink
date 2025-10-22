@@ -1,0 +1,154 @@
+import { createPublicClient, http, Address } from 'viem';
+import { baseSepolia } from 'viem/chains';
+import { createBundlerClient, toCoinbaseSmartAccount } from 'viem/account-abstraction';
+import { toAccount } from 'viem/accounts';
+import type { WalletClient } from 'viem';
+
+const COINBASE_PAYMASTER_URL = import.meta.env.VITE_COINBASE_PAYMASTER_URL;
+
+if (!COINBASE_PAYMASTER_URL) {
+  throw new Error('VITE_COINBASE_PAYMASTER_URL is not set in environment variables');
+}
+
+/**
+ * Creates a smart account with Coinbase paymaster for gas-free transactions
+ */
+export async function createSmartAccountWithPaymaster(walletClient: WalletClient) {
+  try {
+    // Get the account from the wallet client
+    if (!walletClient.account) {
+      throw new Error('Wallet client does not have an account');
+    }
+
+    // Create a proper owner account from the wallet client
+    const owner = toAccount({
+      address: walletClient.account.address,
+      async signMessage({ message }) {
+        return await walletClient.signMessage({ message, account: walletClient.account });
+      },
+      async signTransaction(transaction: any) {
+        return await walletClient.signTransaction({ ...transaction, account: walletClient.account } as any);
+      },
+      async signTypedData(typedData: any) {
+        return await walletClient.signTypedData({ ...typedData, account: walletClient.account } as any);
+      },
+    });
+
+    // Create public client for Base Sepolia (without account property)
+    const publicClient = createPublicClient({
+      chain: baseSepolia,
+      transport: http(),
+    });
+
+    // Create Coinbase smart account using the proper owner
+    const smartAccount = await toCoinbaseSmartAccount({
+      client: publicClient,
+      owners: [owner],
+    });
+
+    // Create bundler client with Coinbase paymaster
+    const bundlerClient = createBundlerClient({
+      account: smartAccount,
+      transport: http(COINBASE_PAYMASTER_URL),
+      chain: baseSepolia,
+    });
+
+    return {
+      smartAccountClient: bundlerClient,
+      smartAccount,
+      publicClient,
+    };
+  } catch (error) {
+    console.error('Error creating smart account with paymaster:', error);
+    throw error;
+  }
+}
+
+/**
+ * Executes a transaction using the paymaster for gas-free execution
+ */
+export async function executeGaslessTransaction(
+  bundlerClient: any,
+  to: Address,
+  data: `0x${string}`,
+  value: bigint = 0n
+) {
+  try {
+    // Create the call object for the transaction
+    const calls = [{
+      to,
+      data,
+      value,
+    }];
+
+    console.log('Sending sponsored user operation...');
+    
+    // Send the user operation with paymaster sponsorship
+    const userOpHash = await bundlerClient.sendUserOperation({
+      account: bundlerClient.account,
+      calls,
+      paymaster: true, // Enable Coinbase paymaster sponsorship
+    });
+
+    console.log('User operation sent:', userOpHash);
+
+    // Wait for the user operation receipt
+    const receipt = await bundlerClient.waitForUserOperationReceipt({
+      hash: userOpHash,
+    });
+
+    console.log('✅ Transaction successfully sponsored!');
+    console.log(`🔍 View on Base Sepolia: https://sepolia.basescan.org/tx/${receipt.receipt.transactionHash}`);
+    
+    return receipt.receipt.transactionHash;
+  } catch (error) {
+    console.error('Error executing gas-free transaction:', error);
+    throw error;
+  }
+}
+
+/**
+ * Checks if paymaster is available and working
+ */
+export async function checkPaymasterStatus(): Promise<boolean> {
+  try {
+    const publicClient = createPublicClient({
+      transport: http(COINBASE_PAYMASTER_URL),
+      chain: baseSepolia,
+    });
+
+    // Try to get the latest block to verify connection
+    await publicClient.getBlockNumber();
+    return true;
+  } catch (error) {
+    console.error('Paymaster not available:', error);
+    return false;
+  }
+}
+
+/**
+ * Estimates gas for a transaction using the paymaster
+ */
+export async function estimateGasWithPaymaster(
+  to: Address,
+  data: `0x${string}`,
+  value: bigint = 0n
+): Promise<bigint> {
+  try {
+    const publicClient = createPublicClient({
+      transport: http(COINBASE_PAYMASTER_URL),
+      chain: baseSepolia,
+    });
+
+    const gasEstimate = await publicClient.estimateGas({
+      to,
+      data,
+      value,
+    });
+
+    return gasEstimate;
+  } catch (error) {
+    console.error('Error estimating gas with paymaster:', error);
+    throw error;
+  }
+}

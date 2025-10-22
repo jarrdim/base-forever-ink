@@ -2,12 +2,13 @@ import { useState, useRef, useMemo, useEffect } from "react";
 import { useAccount } from 'wagmi';
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
-import { GuestbookForm, TagType } from "@/components/GuestbookForm";
+import { PaidGuestbookForm, TagType } from "@/components/PaidGuestbookForm";
+import { RecentSignatures } from "@/components/RecentSignatures";
 import { EntryList } from "@/components/EntryList";
 import { SearchFilter } from "@/components/SearchFilter";
 import { ContractStatus } from "@/components/ContractStatus";
 import { toast } from "sonner";
-import { useGuestbookContract } from "@/hooks/useGuestbookContract";
+import { usePaidGuestbook } from "@/hooks/usePaidGuestbook";
 import { useUserAuth } from "@/hooks/useUserAuth";
 import { guestbookApi, activityApi } from "@/lib/api";
 import { Crown } from "lucide-react";
@@ -41,18 +42,18 @@ export default function Guestbook() {
   const [selectedTagFilter, setSelectedTagFilter] = useState<TagType | "all">("all");
   const entriesRef = useRef<HTMLDivElement>(null);
 
-  // Blockchain integration
+  // Blockchain integration with paid guestbook
   const {
     messages,
     isLoadingMessages,
     signGuestbook,
-    isWritePending,
-    isConfirming,
-    isConfirmed,
-    transactionHash,
+    isSignPending,
+    isSignConfirming,
+    isSignConfirmed,
+    signHash,
     refetchMessages,
     isContractDeployed,
-  } = useGuestbookContract();
+  } = usePaidGuestbook();
 
   // Load entries from blockchain when messages are fetched
   useEffect(() => {
@@ -109,7 +110,7 @@ export default function Guestbook() {
 
   // Save to database and refetch messages when transaction is confirmed
   useEffect(() => {
-    if (isConfirmed && transactionHash && user) {
+    if (isSignConfirmed && signHash && user) {
       const saveToDatabase = async () => {
         try {
           // Get the latest message from blockchain to save to database
@@ -124,7 +125,7 @@ export default function Guestbook() {
               user.walletAddress,
               latestMessage.username || user.username || 'Anonymous',
               latestMessage.content,
-              transactionHash,
+              signHash,
               latestMessage.tag as TagType | undefined
             );
 
@@ -134,7 +135,7 @@ export default function Guestbook() {
                 messageId: response.data.message.messageId,
                 message: latestMessage.content,
                 tag: latestMessage.tag,
-                txHash: transactionHash
+                txHash: signHash
               });
 
               // Update user stats
@@ -158,7 +159,7 @@ export default function Guestbook() {
         entriesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 500);
     }
-  }, [isConfirmed, transactionHash, user, refetchMessages, logActivity, updateUserStats]);
+  }, [isSignConfirmed, signHash, user, refetchMessages, logActivity, updateUserStats]);
 
 
   const handleSubmit = async (message: string, username: string, tag?: TagType) => {
@@ -348,7 +349,12 @@ export default function Guestbook() {
 
         {/* Form Section */}
         <section className="mb-16">
-          <GuestbookForm isConnected={isConnected} onSubmit={handleSubmit} />
+          <PaidGuestbookForm isConnected={isConnected} onSubmit={handleSubmit} />
+        </section>
+
+        {/* Recent Signatures Section */}
+        <section className="mb-16">
+          <RecentSignatures />
         </section>
 
         {/* Entries Section */}

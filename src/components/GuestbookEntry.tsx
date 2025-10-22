@@ -117,7 +117,7 @@ export const GuestbookEntry = ({
         </span>
       </div>
 
-      <p className="font-serif text-gray-800 leading-relaxed mb-4 text-lg">
+      <p className="font-serif text-white leading-relaxed mb-4 text-lg">
         "{message}"
       </p>
 
